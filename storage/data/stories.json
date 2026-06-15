@@ -1,0 +1,12 @@
+[
+  {
+    "id": "story_morning",
+    "title": "每日晨报",
+    "order": 1
+  },
+  {
+    "id": "story_review",
+    "title": "今日复盘",
+    "order": 2
+  }
+]

@@ -1,0 +1,22 @@
+{
+  "id": "u_kasing",
+  "name": "Kasing",
+  "bio": "成为一个持续发现机会、创造价值、建立组织的人",
+  "info": "我的名字是Kasing。\n\n我现在住在武汉。",
+  "lifeStrategy": "我要在2026年6月30日之前完成MACULA项目。",
+  "personalMemory": "我从2026年6月1日开启了MACULA项目。",
+  "avatar": {
+    "type": "gradient",
+    "from": "#c8d8f0",
+    "to": "#a8bce4"
+  },
+  "stats": {
+    "readingTime": "0秒",
+    "readingCount": "0篇",
+    "ideaCount": "0条"
+  },
+  "garden": {
+    "activeDays": 250
+  },
+  "updatedAt": "2026-06-15T20:40:28.045Z"
+}
