@@ -1,6 +1,6 @@
-import { readCollection, updateCollection } from '../db/jsonStore.js';
+import { readCollection, updateCollection, writeCollection } from '../db/jsonStore.js';
 import { config } from '../config.js';
-import { chat, toLlmMessages } from '../llm/index.js';
+import { buildChatPayload, chat, toLlmMessages } from '../llm/index.js';
 import { buildLlmMessages } from '../llm/promptTemplate.js';
 
 /** 将会话列表右侧的时间格式化为 HH:MM */
@@ -163,6 +163,15 @@ async function updateConversationMeta(id, preview) {
   });
 }
 
+/** 覆盖写入全局最新一次 LLM 请求参数到 lastLlmRequest.json */
+async function saveLastLlmRequest(conversationId, request) {
+  await writeCollection('lastLlmRequest', {
+    conversationId,
+    ...request,
+    requestedAt: new Date().toISOString(),
+  });
+}
+
 /**
  * POST /conversations/:id/messages — 发送消息
  * - 普通会话：仅保存用户消息
@@ -214,6 +223,11 @@ export async function createMessage(req, res) {
   const provider = conversation.provider || config.llm.defaultProvider;
   const user = await readCollection('user');
   const llmMessages = buildLlmMessages(thread, user, toLlmMessages);
+
+  await saveLastLlmRequest(id, {
+    provider,
+    ...buildChatPayload(provider, llmMessages),
+  });
 
   let assistantText;
   try {

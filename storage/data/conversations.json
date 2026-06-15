@@ -18,9 +18,19 @@
     "title": "新对话",
     "type": "ai",
     "provider": "deepseek",
-    "time": "04:59",
-    "preview": "你的全名是 **Kasing Dan**，目前住在武汉，正在推进MACULA项目，目标是在2026年6月30日之前完成。…",
+    "time": "05:11",
+    "preview": "好的，Kasing Dan。 已更新你的个人资料中的“测试记录”字段。如有新进展、发现或需要记录的具体内容，随时告诉我，…",
     "order": -1,
     "createdAt": "2026-06-15T20:36:23.380Z"
+  },
+  {
+    "id": "conv_1781557932899",
+    "title": "新对话",
+    "type": "ai",
+    "provider": "deepseek",
+    "time": "05:12",
+    "preview": "Kasing，你好！根据你的计划——MACULA项目要在2026年6月30日前完成，而你从2026年6月1日刚刚启动，这…",
+    "order": -2,
+    "createdAt": "2026-06-15T21:12:12.899Z"
   }
 ]

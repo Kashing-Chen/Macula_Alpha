@@ -1,0 +1,17 @@
+{
+  "conversationId": "conv_1781557932899",
+  "provider": "deepseek",
+  "model": "deepseek-chat",
+  "messages": [
+    {
+      "role": "system",
+      "content": "你是用户的私人助手。以下是用户资料：\n\n【个人信息】\n我的名字是Kasing。\n\n我现在住在武汉。\n\n【人生战略】\n我要在2026年6月30日之前完成MACULA项目。\n\n【个人记忆】\n我从2026年6月1日开启了MACULA项目。"
+    },
+    {
+      "role": "user",
+      "content": "如果我要如期完成macula项目，我现在该做什么？"
+    }
+  ],
+  "stream": false,
+  "requestedAt": "2026-06-15T21:12:27.397Z"
+}

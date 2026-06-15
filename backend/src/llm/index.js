@@ -25,6 +25,21 @@ export function listProviders() {
 }
 
 /**
+ * 组装指定提供商的 LLM 请求体（不含鉴权信息），用于落盘或调试。
+ * @param {string} providerName 提供商名称，如 'deepseek'
+ * @param {Array<{ role: 'system'|'user'|'assistant', content: string }>} messages 对话历史
+ */
+export function buildChatPayload(providerName, messages) {
+  const provider = getProvider(providerName);
+  if (typeof provider.buildPayload !== 'function') {
+    const err = new Error(`Provider ${providerName} does not support buildPayload`);
+    err.status = 500;
+    throw err;
+  }
+  return provider.buildPayload(messages);
+}
+
+/**
  * 向指定提供商发送对话补全请求。
  * @param {string} providerName 提供商名称，如 'deepseek'
  * @param {Array<{ role: 'system'|'user'|'assistant', content: string }>} messages 对话历史

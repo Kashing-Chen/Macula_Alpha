@@ -3,13 +3,23 @@ import { config } from '../../config.js';
 /** 提供商标识，与 LLM_PROVIDER 环境变量及会话的 provider 字段对应 */
 export const name = 'deepseek';
 
+/** 组装发往 DeepSeek API 的请求体（不含鉴权头） */
+export function buildPayload(messages) {
+  const { model } = config.llm.deepseek;
+  return {
+    model,
+    messages,
+    stream: false, // 暂不使用流式，一次性返回完整回复
+  };
+}
+
 /**
  * 调用 DeepSeek 对话补全接口（兼容 OpenAI Chat Completions 格式）。
  * @param {Array<{ role: string, content: string }>} messages 对话历史
  * @returns {Promise<string>} 模型回复文本
  */
 export async function chat(messages) {
-  const { apiKey, baseUrl, model } = config.llm.deepseek;
+  const { apiKey, baseUrl } = config.llm.deepseek;
 
   if (!apiKey) {
     throw new Error('DEEPSEEK_API_KEY is not configured');
@@ -21,11 +31,7 @@ export async function chat(messages) {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${apiKey}`,
     },
-    body: JSON.stringify({
-      model,
-      messages,
-      stream: false, // 暂不使用流式，一次性返回完整回复
-    }),
+    body: JSON.stringify(buildPayload(messages)),
   });
 
   if (!res.ok) {
