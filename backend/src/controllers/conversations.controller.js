@@ -1,6 +1,7 @@
 import { readCollection, updateCollection } from '../db/jsonStore.js';
 import { config } from '../config.js';
 import { chat, toLlmMessages } from '../llm/index.js';
+import { buildLlmMessages } from '../llm/promptTemplate.js';
 
 /** 将会话列表右侧的时间格式化为 HH:MM */
 function formatListTime(date = new Date()) {
@@ -209,9 +210,10 @@ export async function createMessage(req, res) {
     return;
   }
 
-  // 调用大模型生成回复
+  // 调用大模型生成回复（附带解析后的系统提示词）
   const provider = conversation.provider || config.llm.defaultProvider;
-  const llmMessages = toLlmMessages(thread);
+  const user = await readCollection('user');
+  const llmMessages = buildLlmMessages(thread, user, toLlmMessages);
 
   let assistantText;
   try {

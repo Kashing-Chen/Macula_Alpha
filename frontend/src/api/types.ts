@@ -47,6 +47,7 @@ export interface User {
   info: string;
   lifeStrategy?: string;
   personalMemory?: string;
+  promptTemplate?: string;
   avatar: UserAvatar;
   stats: UserStats;
   garden: UserGarden;
@@ -63,7 +64,7 @@ export interface ProfileMenuItem {
   order?: number;
 }
 
-export type ProfileEditSection = 'info' | 'lifeStrategy' | 'personalMemory';
+export type ProfileEditSection = 'info' | 'lifeStrategy' | 'personalMemory' | 'promptManage';
 
 export interface SendMessageResult {
   user: Message;

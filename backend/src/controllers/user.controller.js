@@ -8,7 +8,7 @@ export async function getUser(req, res) {
 
 /** PUT /user — 更新用户资料（仅允许白名单字段） */
 export async function updateUser(req, res) {
-  const allowed = ['name', 'bio', 'info', 'lifeStrategy', 'personalMemory', 'stats', 'garden', 'avatar'];
+  const allowed = ['name', 'bio', 'info', 'lifeStrategy', 'personalMemory', 'promptTemplate', 'stats', 'garden', 'avatar'];
   const patch = {};
   for (const key of allowed) {
     if (req.body[key] !== undefined) patch[key] = req.body[key];

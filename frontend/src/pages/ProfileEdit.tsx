@@ -64,6 +64,9 @@ export function ProfileEdit({ navigate, section }: ProfileEditProps) {
             placeholder={loading ? '加载中…' : config.placeholder} 
             rows={12} 
           />
+          {config.hint && (
+            <p className="text-[13px] text-[#8e8e93] mt-3 leading-[1.45]">{config.hint}</p>
+          )}
           {error && <p className="text-[13px] text-[#ff3b30] mt-2">保存失败：{error}</p>}
         </section>
       </main>

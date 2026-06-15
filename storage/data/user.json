@@ -5,6 +5,7 @@
   "info": "我的名字是Kasing。\n\n我现在住在武汉。",
   "lifeStrategy": "我要在2026年6月30日之前完成MACULA项目。",
   "personalMemory": "我从2026年6月1日开启了MACULA项目。",
+  "promptTemplate": "你是用户的私人助手。以下是用户资料：\n\n【个人信息】\n${个人信息}\n\n【人生战略】\n${人生战略}\n\n【个人记忆】\n${个人记忆}",
   "avatar": {
     "type": "gradient",
     "from": "#c8d8f0",
@@ -18,5 +19,5 @@
   "garden": {
     "activeDays": 250
   },
-  "updatedAt": "2026-06-15T20:40:28.045Z"
+  "updatedAt": "2026-06-15T20:58:09.155Z"
 }

@@ -44,6 +44,16 @@ export const Icons = {
       <line x1="8" y1="12" x2="16" y2="12"/>
     </svg>
   ),
+  PromptManage: ({ className }: { className?: string }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 4h12a2 2 0 0 1 2 2v13l-3.5-2L12 18.5 9.5 17 6 19V6a2 2 0 0 1 2-2z"/>
+      <line x1="8.5" y1="8" x2="15.5" y2="8"/>
+      <line x1="8.5" y1="11.5" x2="13" y2="11.5"/>
+      <path d="M8.5 15h2"/>
+      <path d="M14.5 14.5c.6.6 1.4.9 2.2.9" strokeWidth="1.4"/>
+      <circle cx="17.2" cy="13.2" r="0.8" fill="currentColor" stroke="none"/>
+    </svg>
+  ),
   MyEmail: ({ className }: { className?: string }) => (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="5" width="18" height="14" rx="2"/>
