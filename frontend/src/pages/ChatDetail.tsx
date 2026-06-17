@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Icons } from '../icons';
 import { api } from '../api/client';
 import type { Conversation, Message } from '../api/types';
+import { MarkdownContent } from '../components/MarkdownContent';
 
 interface ChatDetailProps {
   onBack: () => void;
@@ -179,7 +180,7 @@ function Bubble({ message, showTime }: { message: Message; showTime: boolean }) 
         <div className="w-full text-center text-[12px] text-[#8e8e93] leading-[1.2] mb-2 mt-1.5">{formatTime(message.time)}</div>
       )}
       <div className="relative p-[10px_14px] rounded-[18px] text-[16px] leading-[1.45] tracking-[-0.2px] max-w-[90%] bg-[#e9e9eb] text-[#1c1c1e] rounded-bl-[4px]">
-        <p className="relative z-10 m-0 whitespace-pre-wrap">{message.text}</p>
+        <MarkdownContent content={message.text} className="relative z-10" />
         <div className="absolute bottom-0 -left-[7px] w-[20px] h-[20px] bg-[#e9e9eb] rounded-br-[16px_10px]"></div>
         <div className="absolute bottom-0 -left-[10px] w-[10px] h-[20px] bg-[#f2f2f7] rounded-br-[10px]"></div>
       </div>
