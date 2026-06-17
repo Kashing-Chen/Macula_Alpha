@@ -5,7 +5,7 @@ iOS 风格的移动端应用，采用**前后端分离**架构，分为三层：
 | 目录 | 角色 | 技术栈 | 文档 |
 | --- | --- | --- | --- |
 | `frontend/` | 前端框架 | Vite + React 19 + TypeScript + Tailwind | [frontend/STRUCTURE.md](frontend/STRUCTURE.md) |
-| `backend/` | 后端框架 | Node.js + Express（REST API） | [backend/STRUCTURE.md](backend/STRUCTURE.md) |
+| `backend/` | 后端框架 | Python + FastAPI + LangChain Agent | [backend/STRUCTURE.md](backend/STRUCTURE.md) |
 | `storage/` | 数据存储框架 | 纯 JSON 文件 | [storage/STRUCTURE.md](storage/STRUCTURE.md) |
 
 ## 架构总览
@@ -13,7 +13,7 @@ iOS 风格的移动端应用，采用**前后端分离**架构，分为三层：
 ```
 ┌────────────┐   HTTP /api/*    ┌────────────┐   读写     ┌─────────────┐
 │  frontend  │ ───────────────► │  backend   │ ─────────► │   storage   │
-│  (浏览器)  │ ◄─────────────── │ (Express)  │ ◄───────── │ (JSON 文件) │
+│  (浏览器)  │ ◄─────────────── │ (FastAPI)  │ ◄───────── │ (JSON 文件) │
 └────────────┘   JSON 响应      └────────────┘            └─────────────┘
    :3000          (Vite proxy)      :4000                    data/*.json
 ```
@@ -29,8 +29,11 @@ iOS 风格的移动端应用，采用**前后端分离**架构，分为三层：
 ```bash
 # 终端 1：启动后端 (http://localhost:4000)
 cd backend
-npm install
-npm run dev
+python3.12 -m venv .venv   # 需 Python 3.10+（滴答清单 MCP）
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env   # 填入 DEEPSEEK_API_KEY、DIDA365_MCP_TOKEN（可选）
+python run.py
 
 # 终端 2：启动前端 (http://localhost:3000)
 cd frontend
@@ -40,17 +43,19 @@ npm run dev
 
 打开 http://localhost:3000 即可。前端的会话、消息、用户资料等全部来自后端 API。
 
-### AI 对话（DeepSeek）
+### AI 对话（DeepSeek + 滴答清单 MCP）
 
-点击底部「+」会创建标题为「新对话」的 AI 会话。需在 `backend/` 配置 API Key：
+需在 `backend/` 配置 API Key；若要 Agent 管理滴答任务，另配 MCP Token：
 
 ```bash
 cd backend
 cp .env.example .env
-# 编辑 .env，填入 DEEPSEEK_API_KEY
+# 编辑 .env：DEEPSEEK_API_KEY、DIDA365_MCP_TOKEN
 ```
 
-后端 LLM 层位于 `backend/src/llm/`，当前默认使用 DeepSeek，可按同样方式扩展其它模型。
+滴答清单 MCP 配置见 [官方文档](https://help.dida365.com/articles/7438132116019216384)。Token 可在 Cursor 等客户端完成 OAuth 后获取。
+
+后端 LLM 层位于 `backend/app/llm/`，使用 LangChain Agent + DeepSeek；已接入[滴答清单官方 MCP](https://help.dida365.com/articles/7438132116019216384)，可在对话中管理任务。
 
 ## 数据流示例
 
