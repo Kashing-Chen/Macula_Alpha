@@ -67,6 +67,15 @@ backend/
 
 未配置 Token 时，Agent 仍正常工作，仅无滴答清单工具。
 
+## 调试：`storage/data/lastLlmRequest.json`
+
+每次 AI 回复后，会写入最近一次 LangChain 执行轨迹，包含：
+
+- `execution.tools` — 本次加载的工具列表
+- `execution.steps` — Agent 运行步骤（`ai` 推理、`tool_calls` 工具调用、`tool` 工具返回）
+- `execution.durationMs` — 总耗时
+- `response` — 最终回复文本
+
 ## 配置（`app/config.py`，均可用环境变量覆盖）
 
 | 变量 | 默认 | 说明 |

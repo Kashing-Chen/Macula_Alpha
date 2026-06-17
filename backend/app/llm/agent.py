@@ -2,9 +2,17 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+from time import perf_counter
 from typing import Any, Dict, List, Optional
 
-from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+from langchain_core.messages import (
+    AIMessage,
+    BaseMessage,
+    HumanMessage,
+    SystemMessage,
+    ToolMessage,
+)
 from langchain_openai import ChatOpenAI
 from langgraph.prebuilt import create_react_agent
 
@@ -16,6 +24,12 @@ PROVIDER_ALIASES = {
     "deepseek-v4-pro": "deepseek",
     "deepseek-chat": "deepseek",
 }
+
+
+@dataclass
+class ChatResult:
+    text: str
+    trace: Dict[str, Any]
 
 
 def normalize_provider(name: Optional[str]) -> str:
@@ -75,6 +89,120 @@ def _to_langchain_messages(messages: List[Dict[str, str]]) -> list:
     return converted
 
 
+def _content_to_str(content: Any) -> str:
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts: List[str] = []
+        for part in content:
+            if isinstance(part, str):
+                parts.append(part)
+            elif isinstance(part, dict):
+                if part.get("type") == "text":
+                    parts.append(str(part.get("text", "")))
+                else:
+                    parts.append(str(part))
+        return "".join(parts)
+    if content is None:
+        return ""
+    return str(content)
+
+
+def _serialize_tool_calls(message: AIMessage) -> List[Dict[str, Any]]:
+    serialized: List[Dict[str, Any]] = []
+    for call in message.tool_calls or []:
+        if isinstance(call, dict):
+            serialized.append(
+                {
+                    "id": call.get("id"),
+                    "name": call.get("name"),
+                    "args": call.get("args"),
+                }
+            )
+        else:
+            serialized.append(
+                {
+                    "id": getattr(call, "id", None),
+                    "name": getattr(call, "name", None),
+                    "args": getattr(call, "args", None),
+                }
+            )
+    return serialized
+
+
+def _serialize_message(message: BaseMessage, step: int) -> Dict[str, Any]:
+    if isinstance(message, HumanMessage):
+        return {
+            "step": step,
+            "type": "human",
+            "content": _content_to_str(message.content),
+        }
+
+    if isinstance(message, SystemMessage):
+        return {
+            "step": step,
+            "type": "system",
+            "content": _content_to_str(message.content),
+        }
+
+    if isinstance(message, AIMessage):
+        payload: Dict[str, Any] = {
+            "step": step,
+            "type": "ai",
+            "content": _content_to_str(message.content),
+        }
+        tool_calls = _serialize_tool_calls(message)
+        if tool_calls:
+            payload["tool_calls"] = tool_calls
+        if message.response_metadata:
+            payload["response_metadata"] = message.response_metadata
+        return payload
+
+    if isinstance(message, ToolMessage):
+        return {
+            "step": step,
+            "type": "tool",
+            "name": message.name,
+            "tool_call_id": message.tool_call_id,
+            "content": _content_to_str(message.content),
+            "status": getattr(message, "status", None),
+        }
+
+    return {
+        "step": step,
+        "type": message.__class__.__name__,
+        "content": _content_to_str(getattr(message, "content", "")),
+    }
+
+
+def _build_execution_trace(
+    *,
+    provider_name: str,
+    input_messages: List[Dict[str, str]],
+    agent_input_messages: List[BaseMessage],
+    agent_result: Dict[str, Any],
+    tools: List,
+    duration_ms: int,
+) -> Dict[str, Any]:
+    output_messages: List[BaseMessage] = list(agent_result.get("messages") or [])
+    new_messages = output_messages[len(agent_input_messages) :]
+
+    return {
+        "framework": "langgraph",
+        "agent": "create_react_agent",
+        "provider": provider_name,
+        "model": settings.deepseek_model,
+        "durationMs": duration_ms,
+        "tools": [getattr(tool, "name", str(tool)) for tool in tools],
+        "input": {
+            "messageCount": len(input_messages),
+            "messages": input_messages,
+        },
+        "steps": [_serialize_message(message, index + 1) for index, message in enumerate(new_messages)],
+        "stepCount": len(new_messages),
+    }
+
+
 def _extract_response_text(result: Dict[str, Any]) -> str:
     output_messages = result.get("messages") or []
     for message in reversed(output_messages):
@@ -98,7 +226,7 @@ async def chat(
     provider_name: str,
     messages: List[Dict[str, str]],
     user: Dict[str, Any],
-) -> str:
+) -> ChatResult:
     get_provider(provider_name)
 
     system_content = ""
@@ -121,5 +249,17 @@ async def chat(
     )
 
     lc_messages = _to_langchain_messages(conversation_messages)
+    started = perf_counter()
     result = await agent.ainvoke({"messages": lc_messages})
-    return _extract_response_text(result)
+    duration_ms = int((perf_counter() - started) * 1000)
+
+    trace = _build_execution_trace(
+        provider_name=provider_name,
+        input_messages=messages,
+        agent_input_messages=lc_messages,
+        agent_result=result,
+        tools=tools,
+        duration_ms=duration_ms,
+    )
+
+    return ChatResult(text=_extract_response_text(result), trace=trace)

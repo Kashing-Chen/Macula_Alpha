@@ -4,11 +4,11 @@ import { api } from '../api/client';
 import type { Conversation, Message } from '../api/types';
 
 interface ChatDetailProps {
-  navigate: (page: string) => void;
+  onBack: () => void;
   conversationId: string | null;
 }
 
-export function ChatDetail({ navigate, conversationId }: ChatDetailProps) {
+export function ChatDetail({ onBack, conversationId }: ChatDetailProps) {
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
@@ -86,7 +86,7 @@ export function ChatDetail({ navigate, conversationId }: ChatDetailProps) {
     <div className="flex flex-col bg-[#f2f2f7] w-full h-full relative">
       <div className="h-[54px] shrink-0" />
       <header className="relative flex items-center px-4 pb-2 shrink-0 min-h-[40px]">
-        <button onClick={() => navigate('chat_list')} className="w-10 h-10 rounded-full bg-white shadow-[0_1px_6px_rgba(0,0,0,0.1)] flex items-center justify-center text-[#1c1c1e] shrink-0 active:opacity-75">
+        <button onClick={onBack} className="w-10 h-10 rounded-full bg-white shadow-[0_1px_6px_rgba(0,0,0,0.1)] flex items-center justify-center text-[#1c1c1e] shrink-0 active:opacity-75">
           <Icons.ChevronLeft className="w-[20px] h-[20px] -ml-[2px]" />
         </button>
         {conversation?.title && (

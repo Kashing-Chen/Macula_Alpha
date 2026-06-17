@@ -43,13 +43,12 @@ async def _update_conversation_meta(conversation_id: str, preview: str) -> None:
     await update_collection("conversations", mutator)
 
 
-async def _save_last_llm_request(conversation_id: str, request: dict) -> None:
+async def _save_last_llm_request(conversation_id: str, payload: dict) -> None:
     await write_collection(
         "lastLlmRequest",
         {
             "conversationId": conversation_id,
-            **request,
-            "requestedAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+            **payload,
         },
     )
 
@@ -200,18 +199,49 @@ async def create_message(conversation_id: str, body: dict):
     provider = conversation.get("provider") or settings.llm_provider
     user = await read_collection("user")
     llm_messages = build_llm_messages(thread, user)
+    requested_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+    try:
+        chat_result = await chat(provider, llm_messages, user)
+    except ValueError as exc:
+        await _save_last_llm_request(
+            conversation_id,
+            {
+                "provider": provider,
+                **build_chat_payload(provider, llm_messages),
+                "requestedAt": requested_at,
+                "status": "error",
+                "error": str(exc),
+            },
+        )
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    except Exception as exc:
+        await _save_last_llm_request(
+            conversation_id,
+            {
+                "provider": provider,
+                **build_chat_payload(provider, llm_messages),
+                "requestedAt": requested_at,
+                "status": "error",
+                "error": str(exc) or "LLM request failed",
+            },
+        )
+        raise HTTPException(status_code=502, detail=str(exc) or "LLM request failed") from exc
+
+    assistant_text = chat_result.text
+    completed_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
     await _save_last_llm_request(
         conversation_id,
-        {"provider": provider, **build_chat_payload(provider, llm_messages)},
+        {
+            "provider": provider,
+            "requestedAt": requested_at,
+            "completedAt": completed_at,
+            "status": "ok",
+            "response": assistant_text,
+            "execution": chat_result.trace,
+        },
     )
-
-    try:
-        assistant_text = await chat(provider, llm_messages, user)
-    except ValueError as exc:
-        raise HTTPException(status_code=502, detail=str(exc)) from exc
-    except Exception as exc:
-        raise HTTPException(status_code=502, detail=str(exc) or "LLM request failed") from exc
 
     assistant_message = {
         "id": f"msg_{int(datetime.now().timestamp() * 1000) + 1}",
