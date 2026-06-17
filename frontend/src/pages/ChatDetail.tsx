@@ -118,7 +118,7 @@ export function ChatDetail({ onBack, conversationId }: ChatDetailProps) {
         )}
       </main>
 
-      <footer className="absolute bottom-0 left-0 right-0 flex items-center gap-2.5 px-4 pb-[calc(env(safe-area-inset-bottom,0)+24px)] pt-2.5 bg-[#f2f2f7]">
+      <footer className="absolute bottom-0 left-0 right-0 flex items-center gap-2.5 px-4 pb-[calc(env(safe-area-inset-bottom,0)+24px)] pt-2.5 bg-[#f2f2f7]/75 backdrop-blur-xl backdrop-saturate-150">
         <button className="w-9 h-9 border-none rounded-full bg-white shadow-[0_1px_4px_rgba(0,0,0,0.08)] flex items-center justify-center text-[#8e8e93] cursor-pointer shrink-0 active:opacity-75">
           <Icons.Plus className="w-5 h-5" />
         </button>
