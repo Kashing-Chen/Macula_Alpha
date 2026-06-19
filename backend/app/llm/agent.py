@@ -17,8 +17,8 @@ from langchain_openai import ChatOpenAI
 from langgraph.prebuilt import create_react_agent
 
 from app.config import settings
-from app.llm.prompt_template import resolve_prompt_template
-from app.llm.tools import build_tools
+from app.conversation.template import resolve_prompt_template
+from app.toolbox.registry import build_tools
 
 PROVIDER_ALIASES = {
     "deepseek-v4-pro": "deepseek",

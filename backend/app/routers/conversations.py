@@ -8,7 +8,7 @@ from fastapi import APIRouter, HTTPException, Response
 from app.config import settings
 from app.db.json_store import read_collection, update_collection, write_collection
 from app.llm.agent import build_chat_payload, chat
-from app.llm.prompt_template import build_llm_messages
+from app.conversation.messages import build_llm_messages
 
 router = APIRouter(prefix="/conversations", tags=["conversations"])
 

@@ -30,10 +30,15 @@ backend/
     ├── db/
     │   └── json_store.py     # JSON 文件读写层（原子写 + 异步锁）
     ├── llm/
-    │   ├── agent.py          # LangGraph ReAct Agent（create_react_agent + DeepSeek）
-    │   ├── mcp.py            # 滴答清单官方 MCP 客户端
-    │   ├── prompt_template.py
-    │   └── tools.py          # 本地工具 + MCP 工具聚合
+    │   └── agent.py          # LangGraph ReAct Agent（create_react_agent + DeepSeek）
+    ├── toolbox/              # Agent 工具箱，按集成模块划分
+    │   ├── registry.py       # 聚合各模块工具
+    │   ├── user_profile.py   # 用户资料读取
+    │   ├── dida365.py        # 滴答清单官方 MCP
+    │   └── email.py          # 邮箱（预留，尚未接入）
+    ├── conversation/         # 对话参数格式化（非 Agent 工具）
+    │   ├── template.py       # 系统提示词模板变量解析
+    │   └── messages.py       # UI 线程 → LLM messages
     └── routers/              # REST 路由
         ├── user.py
         ├── stories.py
@@ -45,13 +50,17 @@ backend/
 
 ```
 请求 → routers（定义 URL） → db/json_store（读写 JSON） → storage/data/*.json
+                              ↘ conversation/（格式化对话参数）
                               ↘ llm/agent（AI 会话时调用 LangChain Agent）
+                                    ↘ toolbox/（按模块加载工具）
 ```
 
 - **routers**：校验请求、调用数据层、触发 Agent、返回 JSON。
 - **db/json_store**：唯一接触文件系统的模块，提供
   `read_collection` / `write_collection` / `update_collection`，写入为原子操作并按集合串行化。
-- **llm/mcp**：通过 `langchain-mcp-adapters` 连接[滴答清单官方 MCP](https://help.dida365.com/articles/7438132116019216384)（Streamable HTTP），将任务管理工具注入 Agent。
+- **conversation/**：`template.py` 解析 `${个人信息}` 等变量；`messages.py` 将 UI 消息线程转为 LLM 消息格式。
+- **toolbox/**：Agent 工具按集成划分。`registry.py` 聚合各模块；新增 MCP 时在 `MCP_TOOL_LOADERS` 注册即可。
+- **toolbox/dida365**：通过 `langchain-mcp-adapters` 连接[滴答清单官方 MCP](https://help.dida365.com/articles/7438132116019216384)（Streamable HTTP）。
 - **llm/agent**：组装系统提示词、对话历史，通过 LangGraph ReAct Agent 调用 DeepSeek 并返回回复。
 
 ## 滴答清单 MCP
@@ -127,8 +136,17 @@ python run.py               # 或: uvicorn app.main:app --reload --port 4000
 
 ## 扩展 Agent
 
-1. 在 `app/llm/tools.py` 新增 `@tool` 函数（如查询外部 API、写入记忆等）。
-2. 在 `build_user_tools()` 或独立模块中注册工具列表。
-3. `create_react_agent(model=..., tools=..., prompt=...)` 会自动挂载新工具。
+### 新增 MCP 工具模块
 
-如需新增 REST 接口：在 `routers/` 添加路由并在 `app/main.py` 中 `include_router`。
+1. 在 `app/toolbox/` 下新建模块（参考 `dida365.py`），实现 `async def load_tools() -> List`。
+2. 在 `app/toolbox/registry.py` 的 `MCP_TOOL_LOADERS` 中注册模块名与 `load_tools`。
+3. 如需新配置项，在 `app/config.py` 添加对应环境变量。
+
+### 新增本地工具
+
+1. 在 `app/toolbox/` 下新建或扩展模块（参考 `user_profile.py`），实现 `build_tools(user) -> List`。
+2. 在 `registry.build_tools()` 中合并该模块工具。
+
+### 新增 REST 接口
+
+在 `routers/` 添加路由并在 `app/main.py` 中 `include_router`。

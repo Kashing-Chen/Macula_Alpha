@@ -15,7 +15,7 @@ from app.config import settings
 logger = logging.getLogger(__name__)
 
 
-def _dida365_connection() -> Optional[Dict[str, Any]]:
+def _connection() -> Optional[Dict[str, Any]]:
     if not settings.dida365_mcp_enabled:
         return None
 
@@ -32,9 +32,9 @@ def _dida365_connection() -> Optional[Dict[str, Any]]:
     }
 
 
-async def load_dida365_mcp_tools() -> List:
+async def load_tools() -> List:
     """从滴答清单官方 MCP 服务加载 LangChain 工具。"""
-    connection = _dida365_connection()
+    connection = _connection()
     if not connection:
         return []
 
