@@ -107,6 +107,17 @@ export const Icons = {
       <polyline points="15 6 9 12 15 18"/>
     </svg>
   ),
+  ChevronRight: ({ className }: { className?: string }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="9 6 15 12 9 18"/>
+    </svg>
+  ),
+  ChevronUpDown: ({ className }: { className?: string }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="8 9 12 5 16 9"/>
+      <polyline points="8 15 12 19 16 15"/>
+    </svg>
+  ),
   Search: ({ className }: { className?: string }) => (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
       <circle cx="11" cy="11" r="7"/>

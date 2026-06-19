@@ -1,6 +1,6 @@
 [
   { "id": "profile_info", "label": "个人信息", "icon": "ProfileInfo", "action": "profile_edit", "section": "info", "order": 1 },
-  { "id": "life_strategy", "label": "人生战略", "icon": "LifeStrategy", "action": "profile_edit", "section": "lifeStrategy", "order": 2 },
+  { "id": "life_strategy", "label": "战略目标", "icon": "LifeStrategy", "action": "profile_edit", "section": "lifeStrategy", "order": 2 },
   { "id": "personal_memory", "label": "个人记忆", "icon": "PersonalMemory", "action": "profile_edit", "section": "personalMemory", "order": 3 },
   { "id": "prompt_manage", "label": "提示词管理", "icon": "PromptManage", "action": "profile_edit", "section": "promptManage", "order": 4 },
   { "id": "my_email", "label": "我的邮箱", "icon": "MyEmail", "action": null, "order": 5 },

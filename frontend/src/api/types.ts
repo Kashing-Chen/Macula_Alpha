@@ -25,9 +25,10 @@ export interface Message {
 }
 
 export interface UserAvatar {
-  type: string;
-  from: string;
-  to: string;
+  type: 'gradient' | 'image';
+  from?: string;
+  to?: string;
+  url?: string;
 }
 
 export interface UserStats {
@@ -45,6 +46,10 @@ export interface User {
   name: string;
   bio: string;
   info: string;
+  birthDate?: string;
+  location?: string;
+  chaseLifeVision?: boolean;
+  lifeVision?: string;
   lifeStrategy?: string;
   personalMemory?: string;
   promptTemplate?: string;

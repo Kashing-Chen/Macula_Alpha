@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Icons } from '../icons';
 import { api } from '../api/client';
+import { UserAvatarView } from '../components/UserAvatarView';
 import type { ProfileEditSection, ProfileMenuItem, User } from '../api/types';
 
 type IconName = keyof typeof Icons;
@@ -45,13 +46,11 @@ export function Profile({
         )}
 
         <section className="flex flex-col items-center pt-1 pb-2">
-          <div className="w-[88px] h-[88px] rounded-full overflow-hidden mb-3.5 bg-gradient-to-b from-blue-100 to-indigo-200">
-             <div className="w-full h-full flex items-center justify-center bg-[#c8d8f0]">
-                <Icons.Avatar className="w-12 h-12 fill-white" />
-             </div>
+          <div className="mb-3.5">
+            <UserAvatarView avatar={user?.avatar} name={user?.name} />
           </div>
           <h1 className="text-[26px] font-bold text-[#1c1c1e] tracking-[-0.02em] leading-[1.2]">{user?.name ?? '…'}</h1>
-          <p className="mt-1.5 text-[14px] text-[#8e8e93] font-normal text-center">{user?.bio ?? ''}</p>
+          <p className="mt-1.5 text-[14px] text-[#8e8e93] font-normal text-center">{user?.lifeVision ?? user?.bio ?? ''}</p>
         </section>
 
         <section className="bg-white rounded-[20px] shadow-[0_1px_8px_rgba(0,0,0,0.04)] p-[20px_8px_16px]">

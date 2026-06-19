@@ -3,6 +3,7 @@ import { Icons } from '../icons';
 import { api } from '../api/client';
 import type { ProfileEditSection } from '../api/types';
 import { PROFILE_SECTIONS } from '../profileSections';
+import { ProfileInfo } from './ProfileInfo';
 
 interface ProfileEditProps {
   navigate: (page: string) => void;
@@ -10,6 +11,19 @@ interface ProfileEditProps {
 }
 
 export function ProfileEdit({ navigate, section }: ProfileEditProps) {
+  if (section === 'info') {
+    return <ProfileInfo navigate={navigate} />;
+  }
+  return <ProfileTextEdit navigate={navigate} section={section} />;
+}
+
+function ProfileTextEdit({
+  navigate,
+  section,
+}: {
+  navigate: (page: string) => void;
+  section: Exclude<ProfileEditSection, 'info'>;
+}) {
   const config = PROFILE_SECTIONS[section];
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(true);
@@ -56,13 +70,13 @@ export function ProfileEdit({ navigate, section }: ProfileEditProps) {
 
       <main className="flex-1 overflow-y-auto px-4 pt-1 pb-[34px] scrollbar-hide">
         <section className="bg-white rounded-[20px] shadow-[0_1px_8px_rgba(0,0,0,0.04)] p-4">
-          <textarea 
+          <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             disabled={loading || saving}
-            className="w-full min-h-[280px] border-none resize-none bg-transparent outline-none text-[16px] leading-[1.5] tracking-[-0.2px] text-[#1c1c1e] placeholder:text-[#aeaeb2]" 
-            placeholder={loading ? '加载中…' : config.placeholder} 
-            rows={12} 
+            className="w-full min-h-[280px] border-none resize-none bg-transparent outline-none text-[16px] leading-[1.5] tracking-[-0.2px] text-[#1c1c1e] placeholder:text-[#aeaeb2]"
+            placeholder={loading ? '加载中…' : config.placeholder}
+            rows={12}
           />
           {config.hint && (
             <p className="text-[13px] text-[#8e8e93] mt-3 leading-[1.45]">{config.hint}</p>

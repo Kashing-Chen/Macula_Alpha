@@ -12,7 +12,7 @@ export const PROFILE_SECTIONS: Record<
     placeholder: '填写你的个人信息…',
   },
   lifeStrategy: {
-    title: '人生战略',
+    title: '战略目标',
     field: 'lifeStrategy',
     placeholder: '记录你的人生战略与长期目标…',
   },
