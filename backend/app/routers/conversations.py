@@ -8,6 +8,7 @@ from fastapi import APIRouter, HTTPException, Response
 from app.config import settings
 from app.db.json_store import read_collection, update_collection, write_collection
 from app.llm.agent import build_chat_payload, chat
+from app.llm.request_log import append_last_llm_request
 from app.conversation.messages import build_llm_messages
 
 router = APIRouter(prefix="/conversations", tags=["conversations"])
@@ -44,13 +45,7 @@ async def _update_conversation_meta(conversation_id: str, preview: str) -> None:
 
 
 async def _save_last_llm_request(conversation_id: str, payload: dict) -> None:
-    await write_collection(
-        "lastLlmRequest",
-        {
-            "conversationId": conversation_id,
-            **payload,
-        },
-    )
+    await append_last_llm_request(conversation_id, payload)
 
 
 @router.get("")

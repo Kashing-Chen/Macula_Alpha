@@ -1,3 +1,4 @@
 node_modules/
 backend/.env
+storage/data/lastLlmRequest.md
 storage/data/lastLlmRequest.json
