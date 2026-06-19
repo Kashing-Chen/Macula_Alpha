@@ -36,6 +36,13 @@ def _extract_user_message(messages: List[Dict[str, Any]]) -> str:
     return ""
 
 
+def _extract_system_message(messages: List[Dict[str, Any]]) -> str:
+    for message in messages:
+        if message.get("role") == "system":
+            return str(message.get("content", "")).strip()
+    return ""
+
+
 def _json_block(value: Any) -> str:
     if value is None:
         return "（无）"
@@ -214,6 +221,7 @@ def format_round_markdown(conversation_id: str, payload: Dict[str, Any]) -> str:
 
     execution = payload.get("execution") or {}
     input_messages = (execution.get("input") or {}).get("messages") or payload.get("messages") or []
+    system_message = _extract_system_message(input_messages)
     user_message = _extract_user_message(input_messages)
     response = payload.get("response") or payload.get("error") or "（无回复）"
     steps = execution.get("steps") or []
@@ -242,11 +250,26 @@ def format_round_markdown(conversation_id: str, payload: Dict[str, Any]) -> str:
         "",
         *meta_lines,
         "",
-        "### 👤 用户",
-        "",
-        _text_block(user_message),
-        "",
     ]
+
+    if system_message:
+        lines.extend(
+            [
+                "### ⚙️ 系统提示词",
+                "",
+                _text_block(system_message),
+                "",
+            ]
+        )
+
+    lines.extend(
+        [
+            "### 👤 用户",
+            "",
+            _text_block(user_message),
+            "",
+        ]
+    )
 
     if status == "error":
         lines.extend(["### ❌ 错误", "", _text_block(payload.get("error")), ""])

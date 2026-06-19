@@ -175,6 +175,16 @@ def _serialize_message(message: BaseMessage, step: int) -> Dict[str, Any]:
     }
 
 
+def _with_system_message(
+    messages: List[Dict[str, str]],
+    system_content: str,
+) -> List[Dict[str, str]]:
+    if not system_content:
+        return messages
+    without_system = [message for message in messages if message.get("role") != "system"]
+    return [{"role": "system", "content": system_content}, *without_system]
+
+
 def _build_execution_trace(
     *,
     provider_name: str,
@@ -255,7 +265,7 @@ async def chat(
 
     trace = _build_execution_trace(
         provider_name=provider_name,
-        input_messages=messages,
+        input_messages=_with_system_message(messages, system_content),
         agent_input_messages=lc_messages,
         agent_result=result,
         tools=tools,
