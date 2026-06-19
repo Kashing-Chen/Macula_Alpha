@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Awaitable, Callable, Dict, List, Tuple
 
-from app.toolbox import dida365, email, user_profile
+from app.toolbox import dida365, email
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ MCP_TOOL_LOADERS: Tuple[Tuple[str, ToolLoader], ...] = (
 
 async def build_tools(user: Dict[str, Any]) -> List:
     """合并本地工具与各 MCP 模块工具。"""
-    tools = user_profile.build_tools(user)
+    tools: List = []
 
     for module_name, loader in MCP_TOOL_LOADERS:
         try:
