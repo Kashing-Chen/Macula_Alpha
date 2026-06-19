@@ -17,7 +17,7 @@ from langchain_openai import ChatOpenAI
 from langgraph.prebuilt import create_react_agent
 
 from app.config import settings
-from app.conversation.template import resolve_prompt_template
+from app.conversation.template import build_system_prompt
 from app.toolbox.registry import build_tools
 
 PROVIDER_ALIASES = {
@@ -238,7 +238,7 @@ async def chat(
             conversation_messages.append(message)
 
     if not system_content:
-        system_content = resolve_prompt_template(user.get("promptTemplate"), user)
+        system_content = build_system_prompt(user)
 
     llm = _build_llm()
     tools = await build_tools(user)

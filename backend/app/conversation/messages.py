@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from app.conversation.template import resolve_prompt_template
+from app.conversation.template import build_system_prompt
 
 
 def to_llm_messages(thread: List[Dict[str, Any]]) -> List[Dict[str, str]]:
@@ -22,7 +22,7 @@ def build_llm_messages(
     user: Dict[str, Any],
 ) -> List[Dict[str, str]]:
     history = to_llm_messages(thread)
-    system_content = resolve_prompt_template(user.get("promptTemplate"), user)
+    system_content = build_system_prompt(user)
     if not system_content:
         return history
     return [{"role": "system", "content": system_content}, *history]

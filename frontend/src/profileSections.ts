@@ -10,6 +10,7 @@ export const PROFILE_SECTIONS: Record<
     title: '个人信息',
     field: 'info',
     placeholder: '填写你的个人信息…',
+    hint: '与大模型对话时会自动附加到系统提示词，无需在提示词中手动引用。',
   },
   lifeStrategy: {
     title: '战略目标',
