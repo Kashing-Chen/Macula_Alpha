@@ -99,6 +99,13 @@
 3. 调用 dida365_get_task_in_project 获取完整任务（含 projectId、content、columnId、etag 等）
 4. 再执行后续操作
 
+### 验证结果（写操作后的必经步骤）
+创建、更新、完成、移动任务后，**未经验证不得向用户声称已成功**：
+1. 调用 `dida365_get_task_in_project` 回读任务（需 projectId + taskId；仅有 taskId 时用 `dida365_get_task_by_id`）
+2. 核对本次意图变更的字段是否与回读结果一致（如 title、priority、dueDate/startDate、status、content、columnId、projectId 等）
+3. 验证通过后方可简短告知用户；不一致则用最新 etag 重试写操作，仍失败则说明实际状态与原因
+4. 删除任务后：用 `dida365_get_task_in_project` 确认无法获取或任务已不存在，方可告知已删除
+
 ### 获取任务清单
 当感知到用户询问「任务清单」，类似“我还有什么任务没做”时：
 1. **全量未完成**：对用户各清单 projectId 分别调用 dida365_get_project_with_undone_tasks，合并结果
@@ -113,7 +120,8 @@
 2. 创建任务
    - 固定调用 dida365_batch_add_tasks 方法创建任务
    - 若选择的清单为看板类型，按「看板列映射」选择 columnId，并为任务添加 columnId 参数；不确定时调用 dida365_list_columns 获取
-3. 失败重试
+3. 按「验证结果」用返回的 taskId 回读确认
+4. 失败重试
    - 若移动或落列失败，先重试，再给出明确失败原因
    - 不要直接放弃；至少保证任务已在 inbox 成功创建，并把当前状态清晰告知用户
 
@@ -127,8 +135,9 @@
 当感知到用户要「修改/更新/改一下/延期/加备注」等任务时：
 1. 按「定位任务」获取 taskId 与 projectId
 2. 调用 dida365_update_task 更新；仅传需要变更的字段，content 等长文本字段在原有内容基础上合并，不覆盖未提及部分
-3. 需同时改多个任务时，调用 dida365_batch_update_tasks
-4. 需跨清单调整时，先 dida365_move_task 移动，再按需 update 落列或改属性
+3. 按「验证结果」回读确认
+4. 需同时改多个任务时，调用 dida365_batch_update_tasks，并对每个任务分别验证
+5. 需跨清单调整时，先 dida365_move_task 移动，再按需 update 落列或改属性，最后验证
 
 更新原则：
 - 自主判断可改项（标题、备注、优先级、截止时间、所在列等），改完简要告知变更内容
@@ -139,12 +148,14 @@
 当感知到用户说「做完了/完成了/勾掉」等时：
 1. 按「定位任务」获取 taskId 与 projectId
 2. 调用 dida365_complete_task 标记完成
-3. 一次完成多个时，可对同一 projectId 调用 dida365_complete_tasks_in_project（单次最多 20 个）
-4. 完成后简短确认；若任务属高优先级且曾紧急，可主动问一句是否要复盘
+3. 按「验证结果」回读确认 status=2
+4. 一次完成多个时，可对同一 projectId 调用 dida365_complete_tasks_in_project（单次最多 20 个），并对每个任务分别验证
+5. 验证通过后简短确认；若任务属高优先级且曾紧急，可主动问一句是否要复盘
 
 ### 删除任务
 当感知到用户明确要求「删除/去掉」任务时：
 1. 按「定位任务」获取 taskId 与 projectId
 2. **删除不可恢复**，执行前向用户确认具体任务
 3. 确认后调用 dida365_delete_task
-4. 用户只是想「不想做了」但未要求删除时，优先建议完成或移入收集箱，不主动删除
+4. 按「验证结果」确认任务已不存在
+5. 用户只是想「不想做了」但未要求删除时，优先建议完成或移入收集箱，不主动删除
