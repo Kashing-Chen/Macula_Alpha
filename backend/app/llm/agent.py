@@ -13,8 +13,9 @@ from langchain_core.messages import (
     SystemMessage,
     ToolMessage,
 )
+import httpx
 from langchain_openai import ChatOpenAI
-from langgraph.prebuilt import create_react_agent
+from langgraph.prebuilt import ToolNode, create_react_agent
 
 from app.config import settings
 from app.conversation.template import build_system_prompt
@@ -213,6 +214,31 @@ def _build_execution_trace(
     }
 
 
+def _root_exception(exc: BaseException) -> BaseException:
+    current = exc
+    while isinstance(current, BaseExceptionGroup) and current.exceptions:
+        current = current.exceptions[0]
+    return current
+
+
+def format_agent_error(exc: BaseException) -> str:
+    """将 Agent / 工具链异常转为可读错误信息。"""
+    root = _root_exception(exc)
+    if isinstance(root, httpx.ConnectTimeout):
+        return "滴答清单服务连接超时，请检查网络后重试"
+    if isinstance(root, httpx.TimeoutException):
+        return "滴答清单服务响应超时，请稍后重试"
+    if isinstance(root, httpx.HTTPError):
+        return f"滴答清单服务请求失败：{root}"
+    message = str(exc).strip()
+    return message or "LLM request failed"
+
+
+def _format_tool_error(exc: Exception) -> str:
+    """工具失败时返回给模型的错误内容，避免整轮对话崩溃。"""
+    return f"Error: {format_agent_error(exc)}"
+
+
 def _extract_response_text(result: Dict[str, Any]) -> str:
     output_messages = result.get("messages") or []
     for message in reversed(output_messages):
@@ -252,9 +278,10 @@ async def chat(
 
     llm = _build_llm()
     tools = await build_tools(user)
+    tool_node = ToolNode(tools, handle_tool_errors=_format_tool_error)
     agent = create_react_agent(
         model=llm,
-        tools=tools,
+        tools=tool_node,
         prompt=system_content or "你是 Macula，用户的私人 AI 幕僚长。",
     )
 

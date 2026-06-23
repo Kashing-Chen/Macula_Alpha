@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException, Response
 
 from app.config import settings
 from app.db.json_store import read_collection, update_collection, write_collection
-from app.llm.agent import build_chat_payload, chat
+from app.llm.agent import build_chat_payload, chat, format_agent_error
 from app.llm.request_log import append_last_llm_request
 from app.conversation.messages import build_llm_messages
 
@@ -211,6 +211,7 @@ async def create_message(conversation_id: str, body: dict):
         )
         raise HTTPException(status_code=502, detail=str(exc)) from exc
     except Exception as exc:
+        error_text = format_agent_error(exc)
         await _save_last_llm_request(
             conversation_id,
             {
@@ -218,10 +219,10 @@ async def create_message(conversation_id: str, body: dict):
                 **build_chat_payload(provider, llm_messages),
                 "requestedAt": requested_at,
                 "status": "error",
-                "error": str(exc) or "LLM request failed",
+                "error": error_text,
             },
         )
-        raise HTTPException(status_code=502, detail=str(exc) or "LLM request failed") from exc
+        raise HTTPException(status_code=502, detail=error_text) from exc
 
     assistant_text = chat_result.text
     completed_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
